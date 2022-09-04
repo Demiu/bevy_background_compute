@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-channel="*" # something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
+async-channel = "*" # something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
+bevy_app = "0.8"
 bevy_ecs = "0.8"
 bevy_tasks = "0.8"

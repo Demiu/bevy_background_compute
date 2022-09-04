@@ -23,7 +23,7 @@ pub(crate) struct PollableTask<T> {
 }
 
 impl<T> PollableTask<T> {
-    fn poll(&self) -> Option<T> {
+    pub(crate) fn poll(&self) -> Option<T> {
         match self.receiver.try_recv() {
             Ok(value) => Some(value),
             Err(error) => match error {
