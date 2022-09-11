@@ -2,11 +2,18 @@
 name = "bevy_background_compute"
 version = "0.1.0"
 edition = "2021"
+description = "Bevy plugin for better task handling"
+license = "MIT"
+repository = "https://github.com/Demiu/bevy_background_compute"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-channel = "*" # something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
+# something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
+async-channel = "*" 
 bevy_app = "0.8"
 bevy_ecs = "0.8"
 bevy_tasks = "0.8"
+
+[dev-dependencies]
+bevy = { version = "0.8", default-features = false }

@@ -1,10 +1,8 @@
 /// Yoinked from https://github.com/bevyengine/bevy/pull/4102
-
 // TODO replace this with bevy's PollableTask once it's merge in
-
 use std::future::Future;
 
-use async_channel::{Receiver, bounded, TryRecvError};
+use async_channel::{bounded, Receiver, TryRecvError};
 use bevy_tasks::{Task, TaskPool};
 
 /// Extension trait to add spawn_pollable to TaskPool
@@ -29,7 +27,7 @@ impl<T> PollableTask<T> {
             Err(error) => match error {
                 TryRecvError::Empty => None,
                 TryRecvError::Closed => panic!("PoolableTask couldn't receive"),
-            }
+            },
         }
     }
 }
@@ -44,10 +42,13 @@ impl SpawnPollableExt for TaskPool {
         let task = self.spawn(async move {
             let result = future.await;
             match sender.send(result).await {
-                Ok(_) => {},
-                Err(error) => panic!{"Sending result of a task failed: {error}"},
+                Ok(_) => {}
+                Err(error) => panic! {"Sending result of a task failed: {error}"},
             }
         });
-        PollableTask { receiver, _task: task }
+        PollableTask {
+            receiver,
+            _task: task,
+        }
     }
 }
