@@ -1,3 +1,5 @@
+//! A bevy plugin streamlining task handling.
+
 use std::{future::Future, marker::PhantomData, sync::Mutex};
 
 use bevy_app::{App, Plugin};
