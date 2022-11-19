@@ -34,3 +34,10 @@ fn my_callback_sys(
     // Handle like any other bevy event
 }
 ```
+
+## Version compatibility
+
+Plugin | Bevy
+--- | ---
+0.1 | 0.8
+0.2 | 0.9

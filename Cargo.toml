@@ -1,6 +1,6 @@
 [package]
 name = "bevy_background_compute"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "Bevy plugin for better task handling"
 license = "MIT"
@@ -14,10 +14,10 @@ keywords = [
 
 [dependencies]
 # something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
-async-channel = "^1.4.2" 
-bevy_app = "0.8"
-bevy_ecs = "0.8"
-bevy_tasks = "0.8"
+async-channel = "^1.7.1" 
+bevy_app = "0.9"
+bevy_ecs = "0.9"
+bevy_tasks = "0.9"
 
 [dev-dependencies]
-bevy = { version = "0.8", default-features = false }
+bevy = { version = "0.9", default-features = false }

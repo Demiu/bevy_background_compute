@@ -5,8 +5,8 @@ use std::{future::Future, marker::PhantomData, sync::Mutex};
 use bevy_app::{App, Plugin};
 use bevy_ecs::{
     event::EventWriter,
-    schedule::{ParallelSystemDescriptorCoercion, SystemLabel},
-    system::{Command, Commands, ResMut},
+    schedule::{IntoSystemDescriptor, SystemLabel},
+    system::{Command, Commands, Resource, ResMut},
     world::{Mut, World},
 };
 use bevy_tasks::AsyncComputeTaskPool;
@@ -39,6 +39,7 @@ where
     T: Send + Sync + 'static;
 
 /// Resource for holding background tasks to check for completion
+#[derive(Resource)]
 struct BackgroundTasks<T> {
     tasks: Vec<PollableTask<T>>,
 }

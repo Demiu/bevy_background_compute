@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 use bevy::{
-    prelude::{Commands, EventReader, EventWriter, ParallelSystemDescriptorCoercion},
+    prelude::{Commands, EventReader, EventWriter, IntoSystemDescriptor},
     MinimalPlugins,
 };
 use bevy_app::{App, AppExit};
