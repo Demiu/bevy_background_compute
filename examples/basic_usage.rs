@@ -1,14 +1,15 @@
 use std::time::{Duration, Instant};
 
 use bevy::{
-    prelude::{Commands, EventReader, EventWriter, IntoSystemConfig},
+    prelude::{Commands, EventReader, EventWriter},
     MinimalPlugins,
 };
-use bevy_app::{App, AppExit};
+use bevy_app::{App, AppExit, Startup, Update};
 use bevy_background_compute::{
     BackgroundComputeCheck, BackgroundComputeComplete, BackgroundComputePlugin,
     ComputeInBackgroundCommandExt,
 };
+use bevy_ecs::schedule::IntoSystemConfigs;
 
 // A newtype for holding funny numbers only
 #[derive(Debug)]
@@ -19,11 +20,12 @@ fn main() {
         // Minimal plugins are required for creation of taskpools
         .add_plugins(MinimalPlugins)
         // Register the compute result type
-        .add_plugin(BackgroundComputePlugin::<FunnyNumber>::default())
+        .add_plugins(BackgroundComputePlugin::<FunnyNumber>::default())
         // Producer system
-        .add_startup_system(start_background_compute)
+        .add_systems(Startup, start_background_compute)
         // Add a consumer
-        .add_system(
+        .add_systems(
+            Update,
             background_compute_callback
                 // Optional: Schedule the system receiving the callback event to
                 // run after the check system to prevent single-update delays

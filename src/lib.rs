@@ -2,10 +2,10 @@
 
 use std::{future::Future, marker::PhantomData};
 
-use bevy_app::{App, Plugin};
+use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
-    event::EventWriter,
-    schedule::{SystemSet, IntoSystemConfig},
+    event::{EventWriter, Event},
+    schedule::{SystemSet, IntoSystemConfigs},
     system::{Command, Commands, Resource, ResMut},
     world::{Mut, World},
 };
@@ -27,7 +27,6 @@ pub struct BackgroundComputePlugin<T>(PhantomData<fn() -> T>);
 
 /// The set for the internal task checking system
 #[derive(SystemSet)]
-#[system_set(base)]
 pub struct BackgroundComputeCheck<T>(PhantomData<T>);
 
 /// Command struct for holding a future
@@ -43,6 +42,7 @@ struct BackgroundTasks<T> {
 }
 
 /// Event sent once a background compute completes
+#[derive(Event)]
 pub struct BackgroundComputeComplete<T>(pub T)
 where
     T: Send + Sync + 'static;
@@ -114,8 +114,8 @@ where
     fn build(&self, app: &mut App) {
         app.add_event::<BackgroundComputeComplete<T>>()
             .insert_resource(BackgroundTasks::<T> { tasks: vec![] })
-            .add_system(
-                background_compute_check_system::<T>.in_base_set(BackgroundComputeCheck::<T>::new()),
+            .add_systems(
+                Update, background_compute_check_system::<T>.in_set(BackgroundComputeCheck::<T>::new()),
             );
     }
 }
@@ -125,7 +125,7 @@ where
     F: Future<Output = T> + Send + 'static,
     T: Send + Sync + 'static,
 {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         world.resource_scope(|_, mut holder: Mut<BackgroundTasks<T>>| {
             let func = self.0;
             holder
