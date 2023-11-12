@@ -1,12 +1,12 @@
 //! A bevy plugin streamlining task handling.
 
-use std::{future::Future, marker::PhantomData, sync::Mutex};
+use std::{fmt::Debug, future::Future, hash::Hash, marker::PhantomData, sync::Mutex};
 
-use bevy_app::{App, Plugin};
+use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
-    event::EventWriter,
-    schedule::{IntoSystemDescriptor, SystemLabel},
-    system::{Command, Commands, Resource, ResMut},
+    event::{Event, EventWriter},
+    schedule::{IntoSystemConfigs, SystemSet},
+    system::{Command, Commands, ResMut, Resource},
     world::{Mut, World},
 };
 use bevy_tasks::AsyncComputeTaskPool;
@@ -26,9 +26,36 @@ pub trait ComputeInBackgroundCommandExt {
 pub struct BackgroundComputePlugin<T>(PhantomData<fn() -> T>);
 
 /// The label for the internal task checking system
-#[derive(SystemLabel)]
-#[system_label(ignore_fields)]
+#[derive(SystemSet)]
 pub struct BackgroundComputeCheck<T>(PhantomData<T>);
+
+impl<T> Debug for BackgroundComputeCheck<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("BackgroundComputeCheck")
+            .field(&self.0)
+            .finish()
+    }
+}
+
+impl<T> Clone for BackgroundComputeCheck<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<T> PartialEq for BackgroundComputeCheck<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<T> Eq for BackgroundComputeCheck<T> {}
+
+impl<T> Hash for BackgroundComputeCheck<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
 
 // TODO remove Mutex when possible, for now required to make this Sync (for Command trait)
 // https://github.com/bevyengine/bevy/pull/5871
@@ -45,6 +72,7 @@ struct BackgroundTasks<T> {
 }
 
 /// Event sent once a background compute completes
+#[derive(Event)]
 pub struct BackgroundComputeComplete<T>(pub T)
 where
     T: Send + Sync + 'static;
@@ -78,8 +106,9 @@ where
     fn build(&self, app: &mut App) {
         app.add_event::<BackgroundComputeComplete<T>>()
             .insert_resource(BackgroundTasks::<T> { tasks: vec![] })
-            .add_system(
-                background_compute_check_system::<T>.label(BackgroundComputeCheck::<T>::new()),
+            .add_systems(
+                Update,
+                background_compute_check_system::<T>.in_set(BackgroundComputeCheck::<T>::new()),
             );
     }
 }
@@ -89,7 +118,7 @@ where
     F: Future<Output = T> + Send + 'static,
     T: Send + Sync + 'static,
 {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         world.resource_scope(|_, mut holder: Mut<BackgroundTasks<T>>| {
             let func = self
                 .0
