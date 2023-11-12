@@ -1,6 +1,6 @@
 //! A bevy plugin streamlining task handling.
 
-use std::{future::Future, marker::PhantomData, sync::Mutex};
+use std::{future::Future, marker::PhantomData};
 
 use bevy_app::{App, Plugin};
 use bevy_ecs::{
@@ -30,10 +30,8 @@ pub struct BackgroundComputePlugin<T>(PhantomData<fn() -> T>);
 #[system_label(ignore_fields)]
 pub struct BackgroundComputeCheck<T>(PhantomData<T>);
 
-// TODO remove Mutex when possible, for now required to make this Sync (for Command trait)
-// https://github.com/bevyengine/bevy/pull/5871
 /// Command struct for holding a future
-struct ComputeInBackground<F, T>(Mutex<F>)
+struct ComputeInBackground<F, T>(F)
 where
     F: Future<Output = T> + Send + 'static,
     T: Send + Sync + 'static;
@@ -61,7 +59,7 @@ impl<'w, 's> ComputeInBackgroundCommandExt for Commands<'w, 's> {
         F: Future<Output = T> + Send + 'static,
         T: Send + Sync + 'static,
     {
-        self.add(ComputeInBackground(Mutex::new(future)))
+        self.add(ComputeInBackground(future))
     }
 }
 
@@ -91,10 +89,7 @@ where
 {
     fn write(self, world: &mut World) {
         world.resource_scope(|_, mut holder: Mut<BackgroundTasks<T>>| {
-            let func = self
-                .0
-                .into_inner()
-                .expect("Compute in background mutex error");
+            let func = self.0;
             holder
                 .tasks
                 .push(AsyncComputeTaskPool::get().spawn_pollable(func));
