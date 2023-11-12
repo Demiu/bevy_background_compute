@@ -4,9 +4,9 @@ use std::{future::Future, marker::PhantomData};
 
 use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
-    event::{EventWriter, Event},
-    schedule::{SystemSet, IntoSystemConfigs},
-    system::{Command, Commands, Resource, ResMut},
+    event::{Event, EventWriter},
+    schedule::{IntoSystemConfigs, SystemSet},
+    system::{Command, Commands, ResMut, Resource},
     world::{Mut, World},
 };
 use bevy_tasks::AsyncComputeTaskPool;
@@ -47,12 +47,6 @@ pub struct BackgroundComputeComplete<T>(pub T)
 where
     T: Send + Sync + 'static;
 
-impl<T> BackgroundComputeCheck<T> {
-    pub fn new() -> Self {
-        Self(PhantomData)
-    }
-}
-
 impl<'w, 's> ComputeInBackgroundCommandExt for Commands<'w, 's> {
     fn compute_in_background<F, T>(&mut self, future: F)
     where
@@ -69,20 +63,26 @@ impl<T> Default for BackgroundComputePlugin<T> {
     }
 }
 
+impl<T> Default for BackgroundComputeCheck<T> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
+
 // These impls have to be written manually for BackgroundComputeCheck<T>
-// instead of being derived because the #derive[] doesn't ignore the 
+// instead of being derived because the #derive[] doesn't ignore the
 // T bounds in a PhantomData<T> member
 // TODO see: https://github.com/rust-lang/rust/issues/26925 wait 4 fix
 mod impls {
+    use super::BackgroundComputeCheck;
     use std::fmt::Debug;
     use std::hash::Hash;
-    use super::BackgroundComputeCheck;
 
     // TODO this derive is undocumented as a requirement in the migration guide
     // try to remove it, make an issue
     impl<T> Clone for BackgroundComputeCheck<T> {
         fn clone(&self) -> Self {
-            Self(self.0.clone())
+            Self(self.0)
         }
     }
 
@@ -98,7 +98,7 @@ mod impls {
         }
     }
 
-    impl<T> Eq for BackgroundComputeCheck<T> { }
+    impl<T> Eq for BackgroundComputeCheck<T> {}
 
     impl<T> Hash for BackgroundComputeCheck<T> {
         fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -115,7 +115,8 @@ where
         app.add_event::<BackgroundComputeComplete<T>>()
             .insert_resource(BackgroundTasks::<T> { tasks: vec![] })
             .add_systems(
-                Update, background_compute_check_system::<T>.in_set(BackgroundComputeCheck::<T>::new()),
+                Update,
+                background_compute_check_system::<T>.in_set(BackgroundComputeCheck::<T>::default()),
             );
     }
 }
