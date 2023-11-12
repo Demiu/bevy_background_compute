@@ -5,7 +5,7 @@ use std::{future::Future, marker::PhantomData};
 use bevy_app::{App, Plugin};
 use bevy_ecs::{
     event::EventWriter,
-    schedule::{IntoSystemDescriptor, SystemLabel},
+    schedule::{SystemSet, IntoSystemConfig},
     system::{Command, Commands, Resource, ResMut},
     world::{Mut, World},
 };
@@ -25,9 +25,9 @@ pub trait ComputeInBackgroundCommandExt {
 /// The plugin to make a type computable in background
 pub struct BackgroundComputePlugin<T>(PhantomData<fn() -> T>);
 
-/// The label for the internal task checking system
-#[derive(SystemLabel)]
-#[system_label(ignore_fields)]
+/// The set for the internal task checking system
+#[derive(SystemSet)]
+#[system_set(base)]
 pub struct BackgroundComputeCheck<T>(PhantomData<T>);
 
 /// Command struct for holding a future
@@ -69,6 +69,44 @@ impl<T> Default for BackgroundComputePlugin<T> {
     }
 }
 
+// These impls have to be written manually for BackgroundComputeCheck<T>
+// instead of being derived because the #derive[] doesn't ignore the 
+// T bounds in a PhantomData<T> member
+// TODO see: https://github.com/rust-lang/rust/issues/26925 wait 4 fix
+mod impls {
+    use std::fmt::Debug;
+    use std::hash::Hash;
+    use super::BackgroundComputeCheck;
+
+    // TODO this derive is undocumented as a requirement in the migration guide
+    // try to remove it, make an issue
+    impl<T> Clone for BackgroundComputeCheck<T> {
+        fn clone(&self) -> Self {
+            Self(self.0.clone())
+        }
+    }
+
+    impl<T> Debug for BackgroundComputeCheck<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "BackgroundComputeCheck<{:?}>", self.0)
+        }
+    }
+
+    impl<T> PartialEq for BackgroundComputeCheck<T> {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+
+    impl<T> Eq for BackgroundComputeCheck<T> { }
+
+    impl<T> Hash for BackgroundComputeCheck<T> {
+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+            self.0.hash(state);
+        }
+    }
+}
+
 impl<T> Plugin for BackgroundComputePlugin<T>
 where
     T: Send + Sync + 'static,
@@ -77,7 +115,7 @@ where
         app.add_event::<BackgroundComputeComplete<T>>()
             .insert_resource(BackgroundTasks::<T> { tasks: vec![] })
             .add_system(
-                background_compute_check_system::<T>.label(BackgroundComputeCheck::<T>::new()),
+                background_compute_check_system::<T>.in_base_set(BackgroundComputeCheck::<T>::new()),
             );
     }
 }
