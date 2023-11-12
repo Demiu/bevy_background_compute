@@ -13,7 +13,7 @@ pub(crate) trait SpawnPollableExt {
         T: Send + 'static;
 }
 
-/// Wrapper around a Task that allow for polling
+/// Wrapper around a Task that allows for polling
 /// Yoinked from https://github.com/bevyengine/bevy/pull/4102, TODO replace with bevy's version once this gets merged
 pub(crate) struct PollableTask<T> {
     receiver: Receiver<T>,
