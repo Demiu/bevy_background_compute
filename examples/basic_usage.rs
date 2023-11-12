@@ -1,10 +1,7 @@
 use std::time::{Duration, Instant};
 
-use bevy::{
-    prelude::{Commands, EventReader, EventWriter},
-    MinimalPlugins,
-};
-use bevy_app::{App, AppExit, Startup, Update};
+use bevy::{prelude::*, MinimalPlugins};
+use bevy_app::{App, AppExit};
 use bevy_background_compute::{
     BackgroundComputeCheck, BackgroundComputeComplete, BackgroundComputePlugin,
     ComputeInBackgroundCommandExt,
