@@ -26,7 +26,7 @@ fn main() {
             background_compute_callback
                 // Optional: Schedule the system receiving the callback event to
                 // run after the check system to prevent single-update delays
-                .after(BackgroundComputeCheck::<FunnyNumber>::new()),
+                .after(BackgroundComputeCheck::<FunnyNumber>::default()),
         )
         .run();
 }
