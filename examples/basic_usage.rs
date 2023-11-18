@@ -52,7 +52,7 @@ fn background_compute_callback(
     if events.len() > 0 {
         println!(
             "Funny number found: {:?}",
-            events.iter().next().unwrap().0 .0
+            events.read().next().unwrap().0 .0
         );
         // Compute complete, schedule an exit
         exit.send(AppExit);

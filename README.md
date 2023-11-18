@@ -13,7 +13,7 @@ Check out the basic_usage example with
 In order to keep track of running tasks and to produce completion events every type returned by your Futures has to be registered using the `BackgroundComputePlugin<T>`.
 
 ```rust ignore
-app.add_plugin(BackgroundComputePlugin::<MyType>::default())
+app.add_plugins(BackgroundComputePlugin::<MyType>::default())
 ```
 
 ## Computing a Future in background
@@ -29,7 +29,7 @@ commands.compute_in_background(async {
 ```rust ignore
 // Create a system consuming BackgroundComputeComplete<T> events
 fn my_callback_sys(
-    mut events: EventReader<BackgroundComputeComplete<MyResult>>
+    mut events: EventReader<BackgroundComputeComplete<MyType>>
 ) {
     // Handle like any other bevy event
 }
