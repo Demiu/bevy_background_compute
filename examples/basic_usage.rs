@@ -49,7 +49,7 @@ fn background_compute_callback(
     mut events: EventReader<BackgroundComputeComplete<FunnyNumber>>,
     mut exit: EventWriter<AppExit>,
 ) {
-    if events.len() > 0 {
+    if !events.is_empty() {
         println!(
             "Funny number found: {:?}",
             events.read().next().unwrap().0 .0
