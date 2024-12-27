@@ -53,7 +53,7 @@ impl<'w, 's> ComputeInBackgroundCommandExt for Commands<'w, 's> {
         F: Future<Output = T> + Send + 'static,
         T: Send + Sync + 'static,
     {
-        self.add(ComputeInBackground(future))
+        self.queue(ComputeInBackground(future))
     }
 }
 

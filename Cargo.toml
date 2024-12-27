@@ -1,6 +1,6 @@
 [package]
 name = "bevy_background_compute"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 description = "Bevy plugin for better task handling"
 license = "MIT"
@@ -15,9 +15,9 @@ keywords = [
 [dependencies]
 # something with a dedicated oneshot channel would be ideal but bevy already has this as a dep
 async-channel = "^2.3.1" 
-bevy_app = "0.14"
-bevy_ecs = "0.14"
-bevy_tasks = { version = "0.14", features = ["multi_threaded"] } # TODO remove the feature if it will be added to default set
+bevy_app = "0.15"
+bevy_ecs = "0.15"
+bevy_tasks = { version = "0.15", features = ["multi_threaded"] } # TODO remove the feature if it will be added to default set
 
 [dev-dependencies]
-bevy = { version = "0.14", default-features = false }
+bevy = { version = "0.15", default-features = false }
