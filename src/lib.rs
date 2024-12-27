@@ -6,8 +6,8 @@ use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
     event::{Event, EventWriter},
     schedule::{IntoSystemConfigs, SystemSet},
-    system::{Command, Commands, ResMut, Resource},
-    world::{Mut, World},
+    system::{Commands, ResMut, Resource},
+    world::{Command, Mut, World},
 };
 use bevy_tasks::AsyncComputeTaskPool;
 use pollable::{PollableTask, SpawnPollableExt};

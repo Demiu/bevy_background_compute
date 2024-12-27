@@ -55,6 +55,6 @@ fn background_compute_callback(
             events.read().next().unwrap().0 .0
         );
         // Compute complete, schedule an exit
-        exit.send(AppExit);
+        exit.send(AppExit::Success);
     }
 }
